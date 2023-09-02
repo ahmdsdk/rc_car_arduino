@@ -26,25 +26,38 @@ AF_DCMotor motor1(1),
 
 SoftwareSerial hc06(Tx, Rx);
 
-int btnInput = 0,
-  distanceF = 0,
+int distanceF = 0,
   distanceL = 0,
   distanceR = 0,
   distance = 0,
   mode = 0;
 
-char direction = 0,
-  oldDirection = 0;
+char message = 0;
 
 bool isTurnServo = true;
 
 void setup() {
+  setPins();
+  setMotors();
+
+  hc06.begin(9600);
+  
+  toggleLights();
+}
+
+void loop() {
+  checkMode();
+}
+
+void setPins() {
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
   pinMode(MODE_PIN, OUTPUT);
   pinMode(F_LIGHTS, OUTPUT);
   pinMode(B_LIGHTS, OUTPUT);
+}
 
+void setMotors() {
   motor1.setSpeed(MOTOR_SPEED);
   motor1.run(RELEASE);
 
@@ -58,9 +71,9 @@ void setup() {
   motor4.run(RELEASE);
 
   servo.attach(SERVO_PIN);
+}
 
-  hc06.begin(9600);
-
+void toggleLights() {
   digitalWrite(F_LIGHTS, HIGH);
   digitalWrite(B_LIGHTS, HIGH);
   digitalWrite(MODE_PIN, HIGH);
@@ -81,17 +94,16 @@ void setup() {
   digitalWrite(B_LIGHTS, HIGH);
   digitalWrite(MODE_PIN, HIGH);
   delay(1000);
-  digitalWrite(F_LIGHTS, LOW);
+  digitalWrite(F_LIGHTS, HIGH);
   digitalWrite(B_LIGHTS, LOW);
   digitalWrite(MODE_PIN, LOW);
+  
 }
 
-void loop() {
-  digitalWrite(F_LIGHTS, HIGH);
-
+void checkMode() {
   if (mode == 0) {
-    controllerMode();
     digitalWrite(MODE_PIN, HIGH);
+    controllerMode();
   } else {
     digitalWrite(MODE_PIN, LOW);
     freeMode();
@@ -100,30 +112,30 @@ void loop() {
 
 void controllerMode() {
   if (hc06.available()) {
-    direction = hc06.read();
-    if (direction == '8') {
+    message = hc06.read();
+    if (message == '8') {
       drawEight();
     }
     stop();
-    if (direction == 'M') {
+    if (message == 'M') {
       changeMode();
-    } else if (direction == 'F') {
+    } else if (message == 'F') {
       moveForward();
-    } else if (direction == 'B') {
+    } else if (message == 'B') {
       moveBackward();
-    } else if (direction == 'R') {
+    } else if (message == 'R') {
       turnRight();
-    } else if (direction == 'L') {
+    } else if (message == 'L') {
       turnLeft();
-    } else if (direction == 'E') {
+    } else if (message == 'E') {
       forwardRight();
-    } else if (direction == 'C') {
+    } else if (message == 'C') {
       backwardRight();
-    } else if (direction == 'Q') {
+    } else if (message == 'Q') {
       forwardLeft();
-    } else if (direction == 'Z') {
+    } else if (message == 'Z') {
       backwardLeft();
-    } else if (direction == 'S') {
+    } else if (message == 'S') {
       stop();
     }
   }
@@ -132,9 +144,9 @@ void controllerMode() {
 void changeMode() {
   mode = (mode + 1) % 2;
   isTurnServo = !isTurnServo;
-  delay(300);
-  stop();
   delay(100);
+  stop();
+  checkMode();
 }
 
 void freeMode() {
@@ -143,8 +155,8 @@ void freeMode() {
   distanceR = 0;
 
   if (hc06.available()) {
-    direction = hc06.read();
-    if (direction == 'M') {
+    message = hc06.read();
+    if (message == 'M') {
       stop();
       changeMode();
       return;
