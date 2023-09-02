@@ -39,7 +39,6 @@ char direction = 0,
 bool isTurnServo = true;
 
 void setup() {
-  // put your setup code here, to run once:
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
   pinMode(MODE_PIN, OUTPUT);
@@ -88,7 +87,6 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   digitalWrite(F_LIGHTS, HIGH);
 
   if (mode == 0) {
