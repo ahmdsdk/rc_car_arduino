@@ -223,6 +223,13 @@ void drawEight() {
   distanceF = (readUltrasonicDuration(TRIG_PIN, ECHO_PIN) / 2) * 0.0343;
   delay(100);
 
+  if (distanceF <= MIN_DIST / 2) {
+    digitalWrite(B_LIGHTS, HIGH);
+    delay(500);
+    digitalWrite(B_LIGHTS, LOW);
+    return;
+  }
+
   servo.write(LEFT_ANGLE);
   delay(500);
   distanceL = (readUltrasonicDuration(TRIG_PIN, ECHO_PIN) / 2) * 0.0343;
@@ -233,17 +240,35 @@ void drawEight() {
   distanceR = (readUltrasonicDuration(TRIG_PIN, ECHO_PIN) / 2) * 0.0343;
   delay(100);
 
-  bool cancel = distanceF <= MIN_DIST || distanceR <= MIN_DIST || distanceL <= MIN_DIST;
+  turnRight();
+  delay(700);
+  stop();
+  servo.write(FORWARD_ANGLE);
+  delay(500);
+  distanceF = (readUltrasonicDuration(TRIG_PIN, ECHO_PIN) / 2) * 0.0343;
+  delay(100);
 
-  if (cancel) return;
+  turnRight();
+  delay(700);
+  stop();
+  delay(1000);
 
-  forwardLeft();
-  delay(2300);
+  bool cancel = distanceF <= MIN_DIST / 2 || distanceR <= MIN_DIST || distanceL <= MIN_DIST;
+
+  if (cancel) {
+    digitalWrite(B_LIGHTS, HIGH);
+    delay(500);
+    digitalWrite(B_LIGHTS, LOW);
+    return;
+  }
+
+  forwardRight();
+  delay(2250);
   stop();
   delay(150);
   stop();
-  forwardRight();
-  delay(2500);
+  forwardLeft();
+  delay(2250);
   stop();
 }
 
